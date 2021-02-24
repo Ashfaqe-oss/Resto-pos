@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Document</title>
+</head>
+
+<body>
+    <h1>Table no. A1B</h1>
+
+    <form id='order__form'>
+        <h2>Select Items from menu</h2>
+        <button type="submit">Place Order</button>
+    </form>
+
+    <form id='bill__form'>
+        <h2>get your bill here</h2>
+        <button type="submit">Ask for bill</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const $orderPlaced = document.getElementById('order__form');
+        const $billPlaced = document.getElementById('bill__form');
+
+        const socket = io();
+
+        const order_tobe_billed = {
+            tableNo: "A2C",
+            dishes: [{
+                itemName: "Mutton Sukka",
+                customization: "",
+                nos: 2
+            }, {
+                itemName: "Kotu Parota",
+                customization: "",
+                nos: 3
+            }, {
+                itemName: "Prawn Biriyani",
+                customization: "null",
+                nos: 1
+            }],
+            billNo: "3169",
+            time: new Date().toLocaleTimeString()
+        }
+
+        const order_to_send = {
+            tableNo: "A2C",
+            dishes: [{
+                itemName: "Mutton Sukka",
+                customization: "",
+                nos: 2
+            }, {
+                itemName: "Kotu Parota",
+                customization: "",
+                nos: 3
+            }, {
+                itemName: "Prawn Biriyani",
+                customization: "null",
+                nos: 1
+            }],
+            billNo: "3169",
+            time: new Date().toLocaleTimeString()
+        }
+
+        $orderPlaced.addEventListener('submit', e => {
+            e.preventDefault();
+
+            socket.emit("newOrder", {
+                order_to_send
+            });
+            console.log(order_to_send);
+        });
+
+        socket.on('stock-order-update', (data) => {
+            console.log(data, "received");
+        });
+
+        socket.on('product_realtime_updated_stock', (data) => {
+            console.log(data);
+        })
+
+        socket.on('Product_Nan', data => {
+            console.log(data);
+        });
+
+        socket.on('no_more_stock', (data) => {
+            console.log(data);
+        });
+
+        const created_new_bill = {
+            billNo: "3149",
+            tableNo: "A31",
+            billAmount: "535",
+            time: new Date().toLocaleTimeString(),
+            date: new Date().toLocaleDateString()
+        }
+
+        $billPlaced.addEventListener('submit', e => {
+            e.preventDefault();
+
+            socket.emit("newBill", {
+                order_tobe_billed
+            });
+            //console.log(created_new_bill);
+
+            socket.on('bill_placed', (data) => {
+                console.log(data, "bill callback");
+            });
+        });
+    </script>
+</body>
+
+</html>
